@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Hitachi Projector Remote</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <button class="button" name="power" onclick="sendCommandName(this.name)">Power</button>
+    <button class="button right" name="menu" onclick="sendCommandName(this.name)">Menu</button>
+    <br>
+    <br>
+      <div class="direction-buttons">
+        <button class="button" name="up" onclick="sendCommandName(this.name)"><i class="arrow arrow-up"></i></button>
+        <br><br>
+        <button class="button" name="left" onclick="sendCommandName(this.name)"><i class="arrow arrow-left"></i></button>
+        <button class="button" name="right" onclick="sendCommandName(this.name)"><i class="arrow arrow-right"></i></button>
+        <br><br>
+        <button class="button" name="down" onclick="sendCommandName(this.name)"><i class="arrow arrow-down"></i></button>
+    </div>
+    <br>
+    <button class="button right" name="enter" onclick="sendCommandName(this.name)">Enter</button>
+    <br>
+    <label for="command_list">Choose a command:</label>
+    <select name="command" id="command_list">
+      <option value="zoom_in">zoom_in</option>
+      <option value="zoom_out">zoom_out</option>
+      <option value="focus_in">focus_in</option>
+      <option value="focus_out">focus_out</option>
+      <option value="shift_up">shift_up</option>
+      <option value="shift_down">shift_down</option>
+      <option value="video_input">video_input</option>
+    </select>
+    <br>
+    <button class="button left" name="Send Command" onclick="sendCommandName(getSelectedCommand())">Send Command</button>
+    <br>
+    <br>
+    <input type="number" id="command" name="command" step="1" min="1" max="255">
+    <input type="submit" value="Send Number" onclick="sendCommand()">
+    <script>
+      function getSelectedCommand() {
+        var select = document.getElementById("command_list");
+        return select.options[select.selectedIndex].value;
+      }
+      function sendCommand() {
+        var command = document.getElementById("command").value;
+        var xhr = new XMLHttpRequest();
+        xhr.open("GET", "/custom?command=" + command, true);
+        xhr.send();
+      }
+      function sendCommandName(name) {
+        var xhr = new XMLHttpRequest();
+        xhr.open("GET", "/command?name=" + name, true);
+        xhr.send();
+      }
+    </script>
+</body>
+</html>
