@@ -4,8 +4,7 @@
 #include "async_web_server.h"
 
 const int HTTP_PORT = 80;
-
-AsyncWebServer *server = nullptr;
+AsyncWebServer* server = nullptr;
 bool IsRebootRequired = false;
 
 void server_init() {
@@ -21,4 +20,6 @@ void server_init() {
     server->on("/style.css", HTTP_GET, [](AsyncWebServerRequest *request){
         request->send(SPIFFS, "/style.css", "text/css");
     });
+
+    server->begin();
 }

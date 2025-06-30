@@ -2,8 +2,8 @@
 #define ASYNC_SERVER_H_
 #include <ESPAsyncWebServer.h>
 
-AsyncWebServer* server;
-bool IsRebootRequired;
+extern AsyncWebServer* server;
+extern bool IsRebootRequired;
 
 void server_init();
 
