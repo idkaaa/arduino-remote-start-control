@@ -9,22 +9,32 @@ const int REMOTE_START_PIN = 23; // GPIO pin for remote start control
 
 int ComfortTempMin = 10; // Minimum comfort temperature
 int ComfortTempMax = 30; // Maximum comfort temperature
+bool IsComfortStartEnabled = false; // Flag to check if comfort start is enabled, default to true
 
 int PreviousTemp = -1;
 
 unsigned int ComfortCheckInterval; // Interval to check comfort temperature in milliseconds
 unsigned int NextComfortRestartTime = 0; // Next time to restart for comfort temperature
 
+bool IsVehicleRunning = false; // Flag to check if the vehicle is running. Assume false for initial boot
+
 void remote_start_controller_init()
 {
     ComfortCheckInterval = 37 * 60 * 1000; // Set comfort check interval to 37 minutes
     pinMode(REMOTE_START_PIN, OUTPUT);
+    digitalWrite(REMOTE_START_PIN, HIGH); // Set the remote start pin to HIGH (inactive state)
+}
+
+void toggle_vehicle_running_state() {
+    IsVehicleRunning = !IsVehicleRunning; // Toggle the vehicle running state
+    Serial.println("Vehicle running state toggled. Is vehicle running? " + String(IsVehicleRunning ? "Yes" : "No"));
 }
 
 void remote_start_trigger(){
     digitalWrite(REMOTE_START_PIN, LOW);
     delay(1000); // Trigger the remote start for 1 second
-    digitalWrite(REMOTE_START_PIN, HIGH); // Turn off the remote start
+    digitalWrite(REMOTE_START_PIN, HIGH); // Turn off the relay
+    toggle_vehicle_running_state(); // Toggle the vehicle running state
 }
 
 bool isTempInRange(int temp) {
@@ -41,6 +51,10 @@ bool isTempInRange(int temp) {
 
 void remote_start_comfort_check(int currentTemp)
 {
+    if (!IsComfortStartEnabled) { 
+        PreviousTemp = -1; // Reset PreviousTemp if comfort start is disabled
+        return; 
+    }
     if (PreviousTemp == -1) {
         PreviousTemp = currentTemp; // Initialize PreviousTemp on first run
     }

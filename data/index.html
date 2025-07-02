@@ -6,6 +6,18 @@
 <body>
   <h2>Remote Start Control</h2>
   <p>
+    <span class="dht-labels">Is Vehicle Running?</span>
+    <span id="vehicle_running_state"></span>
+  </p>
+  <p>
+    <span class="dht-labels">Comfort Range:</span>
+    <span id="comfort_temp_range_display_min"></span>
+    <sup class="units">&deg;C</sup>
+    <span>-</span>
+    <span id="comfort_temp_range_display_max"></span>
+    <sup class="units">&deg;C</sup>
+  </p>
+  <p>
     <i class="fas fa-thermometer-half" style="color:#059e8a;"></i> 
     <span class="dht-labels">Temperature</span> 
     <span id="temperature">%TEMPERATURE%</span>
@@ -17,6 +29,15 @@
     <span id="humidity">%HUMIDITY%</span>
     <sup class="units">&percnt;</sup>
   </p>
+  
+  <br>
+  <br>
+  <h4>Enable/Disable Comfort Start</h4>
+  <label class="switch">
+    <input type="checkbox" onchange="sendComfortStartState()" id="comfort_start_toggle">
+    <span class="slider"></span>
+  </label>
+  <br>
   <br>
   <button class="button" onclick="sendManualStart()">Manual On/Off</button>
   <br>
@@ -32,50 +53,61 @@
   <br>
 </body>
 <script>
-  function sendManualStart() {
-        var xhr = new XMLHttpRequest();
-        xhr.open("GET", "/start", true);
-        xhr.send();
+  function refreshData(shouldRefreshInputs)
+  {
+    var xhttp = new XMLHttpRequest();
+    xhttp.onreadystatechange = function() {
+      if (this.readyState == 4 && this.status == 200) {
+        var jsonData = JSON.parse(this.responseText);
+        console.log(jsonData);
+        document.getElementById("temperature").innerHTML = jsonData.temperature;
+        document.getElementById("humidity").innerHTML = jsonData.humidity;
+        document.getElementById("vehicle_running_state").innerHTML = jsonData.vehicle_running ? "Yes" : "No";
+        document.getElementById("comfort_temp_range_display_min").innerHTML = jsonData.comfort_temp_min;
+        document.getElementById("comfort_temp_range_display_max").innerHTML = jsonData.comfort_temp_max;
+        document.getElementById("comfort_start_toggle").checked = jsonData.comfort_start_enabled;
+        if (shouldRefreshInputs){
+          // Set the comfort temperature inputs
+          document.getElementById("comfort_temp_min").value = jsonData.comfort_temp_min;
+          document.getElementById("comfort_temp_max").value = jsonData.comfort_temp_max;
+        }
       }
-      
+    };
+    xhttp.open("GET", "/refresh", true);
+    xhttp.send();
+  }
+
+  function sendManualStart() {
+    var xhr = new XMLHttpRequest();
+    xhr.open("GET", "/start", true);
+    xhr.send();
+    refreshData(false);
+  }
+
   function sendComfortRange() {
     var xhr = new XMLHttpRequest();
     var tempMin = document.getElementById("comfort_temp_min").value;
     var tempMax = document.getElementById("comfort_temp_max").value;
     xhr.open("GET", "/update?temp_min="+tempMin+"&temp_max="+tempMax, true);
     xhr.send();
+    refreshData(false);
   }
 
-setInterval(function ( ) {
-  var xhttp = new XMLHttpRequest();
-  xhttp.onreadystatechange = function() {
-    if (this.readyState == 4 && this.status == 200) {
-      var jsonData = JSON.parse(this.responseText);
-      console.log(jsonData);
-      document.getElementById("temperature").innerHTML = jsonData.temperature;
-      document.getElementById("humidity").innerHTML = jsonData.humidity;
-      // document.getElementById("comfort_temp_min").value = jsonData.comfort_temp_min;
-      // document.getElementById("comfort_temp_max").value = jsonData.comfort_temp_max;
-    }
-  };
-  xhttp.open("GET", "/refresh", true);
-  xhttp.send();
-}, 10000 );
+  function sendComfortStartState()
+  {
+    var xhr = new XMLHttpRequest();
+    var shouldEnableComfortStart = document.getElementById("comfort_start_toggle").checked ? "1" : "0";
+    xhr.open("GET", "/update?comfort_start_enable="+shouldEnableComfortStart, true);
+    xhr.send();
+    refreshData(false);
+  }
+  // Refresh data every 10 seconds
+  setInterval(function ( ) {
+    refreshData(false);
+  }, 10000 );
 
-window.onload = function() {
-  var xhttp = new XMLHttpRequest();
-  xhttp.onreadystatechange = function() {
-    if (this.readyState == 4 && this.status == 200) {
-      var jsonData = JSON.parse(this.responseText);
-      console.log(jsonData);
-      document.getElementById("temperature").innerHTML = jsonData.temperature;
-      document.getElementById("humidity").innerHTML = jsonData.humidity;
-      document.getElementById("comfort_temp_min").value = jsonData.comfort_temp_min;
-      document.getElementById("comfort_temp_max").value = jsonData.comfort_temp_max;
-    }
+  window.onload = function() {
+    refreshData(true);
   };
-  xhttp.open("GET", "/refresh", true);
-  xhttp.send();
-};
 </script>
 </html>

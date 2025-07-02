@@ -11,6 +11,7 @@ AsyncWebServer* server = nullptr;
 bool IsRebootRequired = false;
 const char* PARAM_INPUT_COMFORT_TEMP_MIN = "temp_min";
 const char* PARAM_INPUT_COMFORT_TEMP_MAX = "temp_max";
+const char* PARAM_INPUT_COMFORT_START_ENABLE = "comfort_start_enable";
 
 JSONVar jsonData;
 
@@ -49,6 +50,8 @@ void server_init() {
         jsonData["humidity"] = readDHTHumidity();
         jsonData["comfort_temp_min"] = ComfortTempMin;
         jsonData["comfort_temp_max"] = ComfortTempMax;
+        jsonData["comfort_start_enabled"] = IsComfortStartEnabled; // Assuming you have a flag for comfort start
+        jsonData["vehicle_running"] = IsVehicleRunning;
         String jsonString = JSON.stringify(jsonData);
         String currentTemp = readDHTTemperature();
         remote_start_comfort_check(currentTemp.toInt());
@@ -65,17 +68,18 @@ void server_init() {
     server->on("/update", HTTP_GET, [] (AsyncWebServerRequest *request) {
         Serial.println("Update request received");
         String inputMessageTempMin;
-        String inputParamTempMin;
         String inputMessageTempMax;
-        String inputParamTempMax;
+        String inputMessageComfortStartEnable;
         if (request->hasParam(PARAM_INPUT_COMFORT_TEMP_MIN) && request->hasParam(PARAM_INPUT_COMFORT_TEMP_MAX)) {
             inputMessageTempMin = request->getParam(PARAM_INPUT_COMFORT_TEMP_MIN)->value();
             inputMessageTempMax = request->getParam(PARAM_INPUT_COMFORT_TEMP_MAX)->value();
             ComfortTempMin = inputMessageTempMin.toInt();
             ComfortTempMax = inputMessageTempMax.toInt();
-            inputParamTempMin = String(ComfortTempMin);
-            inputParamTempMax = String(ComfortTempMax);
-            Serial.println("Comfort temperature updated: " + inputParamTempMin + " - " + inputParamTempMax);
+            Serial.println("Comfort temperature updated: " + inputMessageTempMin + " - " + inputMessageTempMax);
+        }else if (request->hasParam(PARAM_INPUT_COMFORT_START_ENABLE)) {
+            inputMessageComfortStartEnable = request->getParam(PARAM_INPUT_COMFORT_START_ENABLE)->value();
+            IsComfortStartEnabled = (inputMessageComfortStartEnable == "1");
+            Serial.println("Comfort start enabled updated to: " + inputMessageComfortStartEnable);
         }
         request->send(200, "text/plain", "OK");
     });
