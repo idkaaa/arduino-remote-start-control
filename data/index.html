@@ -1,61 +1,81 @@
-<!DOCTYPE html>
-<html lang="en">
-
+<!DOCTYPE HTML><html>
 <head>
-  <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Hitachi Projector Remote</title>
   <link rel="stylesheet" href="style.css">
 </head>
-
 <body>
-    <button class="button" name="power" onclick="sendCommandName(this.name)">Power</button>
-    <button class="button right" name="menu" onclick="sendCommandName(this.name)">Menu</button>
+  <h2>Remote Start Control</h2>
+  <p>
+    <i class="fas fa-thermometer-half" style="color:#059e8a;"></i> 
+    <span class="dht-labels">Temperature</span> 
+    <span id="temperature">%TEMPERATURE%</span>
+    <sup class="units">&deg;C</sup>
+  </p>
+  <p>
+    <i class="fas fa-tint" style="color:#00add6;"></i> 
+    <span class="dht-labels">Humidity</span>
+    <span id="humidity">%HUMIDITY%</span>
+    <sup class="units">&percnt;</sup>
+  </p>
+  <br>
+  <button class="button" onclick="sendManualStart()">Manual On/Off</button>
+  <br>
+  <br>
+  <br>
+    <label for="temp_min">Minimum Comfort Temperature</label>
+    <input type="number" id="comfort_temp_min" step="1" min="1" max="255">
     <br>
+    <label for="temp_max">Maximum Comfort Temperature</label>
+    <input type="number" id="comfort_temp_max" step="1" min="1" max="255">
     <br>
-      <div class="direction-buttons">
-        <button class="button" name="up" onclick="sendCommandName(this.name)"><i class="arrow arrow-up"></i></button>
-        <br><br>
-        <button class="button" name="left" onclick="sendCommandName(this.name)"><i class="arrow arrow-left"></i></button>
-        <button class="button" name="right" onclick="sendCommandName(this.name)"><i class="arrow arrow-right"></i></button>
-        <br><br>
-        <button class="button" name="down" onclick="sendCommandName(this.name)"><i class="arrow arrow-down"></i></button>
-    </div>
-    <br>
-    <button class="button right" name="enter" onclick="sendCommandName(this.name)">Enter</button>
-    <br>
-    <label for="command_list">Choose a command:</label>
-    <select name="command" id="command_list">
-      <option value="zoom_in">zoom_in</option>
-      <option value="zoom_out">zoom_out</option>
-      <option value="focus_in">focus_in</option>
-      <option value="focus_out">focus_out</option>
-      <option value="shift_up">shift_up</option>
-      <option value="shift_down">shift_down</option>
-      <option value="video_input">video_input</option>
-    </select>
-    <br>
-    <button class="button left" name="Send Command" onclick="sendCommandName(getSelectedCommand())">Send Command</button>
-    <br>
-    <br>
-    <input type="number" id="command" name="command" step="1" min="1" max="255">
-    <input type="submit" value="Send Number" onclick="sendCommand()">
-    <script>
-      function getSelectedCommand() {
-        var select = document.getElementById("command_list");
-        return select.options[select.selectedIndex].value;
-      }
-      function sendCommand() {
-        var command = document.getElementById("command").value;
-        var xhr = new XMLHttpRequest();
-        xhr.open("GET", "/custom?command=" + command, true);
-        xhr.send();
-      }
-      function sendCommandName(name) {
-        var xhr = new XMLHttpRequest();
-        xhr.open("GET", "/command?name=" + name, true);
-        xhr.send();
-      }
-    </script>
+    <button class="button" onclick="sendComfortRange()">Set Comfort Range</button>
+  <br>
 </body>
+<script>
+  function sendManualStart() {
+        var xhr = new XMLHttpRequest();
+        xhr.open("GET", "/start", true);
+        xhr.send();
+      }
+      
+  function sendComfortRange() {
+    var xhr = new XMLHttpRequest();
+    var tempMin = document.getElementById("comfort_temp_min").value;
+    var tempMax = document.getElementById("comfort_temp_max").value;
+    xhr.open("GET", "/update?temp_min="+tempMin+"&temp_max="+tempMax, true);
+    xhr.send();
+  }
+
+setInterval(function ( ) {
+  var xhttp = new XMLHttpRequest();
+  xhttp.onreadystatechange = function() {
+    if (this.readyState == 4 && this.status == 200) {
+      var jsonData = JSON.parse(this.responseText);
+      console.log(jsonData);
+      document.getElementById("temperature").innerHTML = jsonData.temperature;
+      document.getElementById("humidity").innerHTML = jsonData.humidity;
+      // document.getElementById("comfort_temp_min").value = jsonData.comfort_temp_min;
+      // document.getElementById("comfort_temp_max").value = jsonData.comfort_temp_max;
+    }
+  };
+  xhttp.open("GET", "/refresh", true);
+  xhttp.send();
+}, 10000 );
+
+window.onload = function() {
+  var xhttp = new XMLHttpRequest();
+  xhttp.onreadystatechange = function() {
+    if (this.readyState == 4 && this.status == 200) {
+      var jsonData = JSON.parse(this.responseText);
+      console.log(jsonData);
+      document.getElementById("temperature").innerHTML = jsonData.temperature;
+      document.getElementById("humidity").innerHTML = jsonData.humidity;
+      document.getElementById("comfort_temp_min").value = jsonData.comfort_temp_min;
+      document.getElementById("comfort_temp_max").value = jsonData.comfort_temp_max;
+    }
+  };
+  xhttp.open("GET", "/refresh", true);
+  xhttp.send();
+};
+</script>
 </html>

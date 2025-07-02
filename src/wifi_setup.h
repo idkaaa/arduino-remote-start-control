@@ -5,13 +5,22 @@
 #include <ESPmDNS.h>
 #include "secrets.h"
 
-
 void wifi_init() {
-    WiFi.softAP(WIFI_SSID, WIFI_PASSWORD);
-    IPAddress ip = WiFi.softAPIP();
-    Serial.print("AP IP address: ");
-    Serial.println(ip);
-
+    bool isDebugMode = false;
+    
+    if (!isDebugMode) {
+        WiFi.softAP(WIFI_SSID, WIFI_PASSWORD);
+        IPAddress ip = WiFi.softAPIP();
+        Serial.print("AP IP address: ");
+        Serial.println(ip);
+    } else {
+        WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
+        while (WiFi.status() != WL_CONNECTED) {
+          delay(1000);
+          Serial.println("Connecting to WiFi..");
+        }
+        Serial.println(WiFi.localIP());
+    }
     if (!MDNS.begin(MDNS_HOSTNAME)) {
         Serial.println("Error setting up MDNS responder!");
         while(1) {

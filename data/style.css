@@ -1,36 +1,18 @@
-.button {
+html {
+    font-family: Arial;
+    display: inline-block;
+    margin: 0px auto;
+    text-align: center;
+  }
+  h2 { font-size: 3.0rem; }
+  p { font-size: 3.0rem; }
+  .units { font-size: 1.2rem; }
+  .dht-labels{
+    font-size: 1.5rem;
+    vertical-align:middle;
+    padding-bottom: 15px;
+  }
+  .button {
     width: 100px;
     height: 50px;
-}
-.right {
-    float: right;
-}
-.direction-buttons {
-    text-align: center;
-}
-.arrow {
-  border: solid black;
-  border-width: 0 3px 3px 0;
-  display: inline-block;
-  padding: 3px;
-}
-
-.arrow-right {
-  transform: rotate(-45deg);
-  -webkit-transform: rotate(-45deg);
-}
-
-.arrow-left {
-  transform: rotate(135deg);
-  -webkit-transform: rotate(135deg);
-}
-
-.arrow-up {
-  transform: rotate(-135deg);
-  -webkit-transform: rotate(-135deg);
-}
-
-.arrow-down {
-  transform: rotate(45deg);
-  -webkit-transform: rotate(45deg);
-}
+  }
