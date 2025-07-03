@@ -3,8 +3,9 @@
 #include <ESPAsyncWebServer.h>
 
 extern AsyncWebServer* server;
-extern bool IsRebootRequired;
 
 void server_init();
+void refresh_sensor_data();
+void remote_start_check();
 
 #endif

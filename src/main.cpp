@@ -9,4 +9,7 @@ void setup() {
 }
 
 void loop() {
+  delay(5000);
+  refresh_sensor_data(); // Read sensor data periodically
+  remote_start_check();
 }

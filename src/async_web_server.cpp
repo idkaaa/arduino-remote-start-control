@@ -15,26 +15,20 @@ const char* PARAM_INPUT_COMFORT_START_ENABLE = "comfort_start_enable";
 
 JSONVar jsonData;
 
-// // Replaces placeholder with DHT values
-// String processor(const String &var)
-// {
-//     // Serial.println(var);
-//     if (var == "TEMPERATURE")
-//     {
-//         return readDHTTemperature();
-//     }
-//     else if (var == "HUMIDITY")
-//     {
-//         return readDHTHumidity();
-//     }
-//     return String();
-// }
+void refresh_sensor_data() {
+    readDHTSensor(); // Read sensor data
+}
+
+void remote_start_check() {
+    remote_start_comfort_check(CurrentTemperatureCelcius);
+}
 
 void server_init() {
     if(!SPIFFS.begin(true)){
       Serial.println("An Error has occurred while mounting SPIFFS");
       return;
     }
+    sensor_reader_init();
     remote_start_controller_init();
     server = new AsyncWebServer(HTTP_PORT);
 
@@ -51,10 +45,10 @@ void server_init() {
         jsonData["comfort_temp_min"] = ComfortTempMin;
         jsonData["comfort_temp_max"] = ComfortTempMax;
         jsonData["comfort_start_enabled"] = IsComfortStartEnabled; // Assuming you have a flag for comfort start
-        jsonData["vehicle_running"] = IsVehicleRunning;
+        jsonData["vehicle_running"] = IsVehicleRunning; 
         String jsonString = JSON.stringify(jsonData);
-        String currentTemp = readDHTTemperature();
-        remote_start_comfort_check(currentTemp.toInt());
+        //String currentTemp = readDHTTemperature();
+        //remote_start_comfort_check(currentTemp.toInt());
         request->send(200, "application/json", jsonString);
         jsonString = String();
     });
